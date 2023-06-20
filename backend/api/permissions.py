@@ -10,5 +10,7 @@ class IsAuthorOrReadOnly(BasePermission):
 class IsAdminOrReadOnly(BasePermission):
     """Проверка прав на роль Админа."""
     def has_permission(self, request, view):
-        return (request.method in SAFE_METHODS
-                or request.user and request.user.is_staff)
+        return (
+            request.method in SAFE_METHODS
+            or request.user and request.user.is_staff
+        )

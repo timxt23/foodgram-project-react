@@ -8,12 +8,22 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
+from api.pagination_limit import LimitPageNumberPagination
 from .filters import IngredientFilter, TagRecipeFilter
-from .models import (Favorite, Ingredient, IngredientRecipe, Recipe,
-                     ShoppingCart, Tag)
+from .models import (
+    Favorite, Ingredient,
+    IngredientRecipe,
+    Recipe,
+    ShoppingCart,
+    Tag
+)
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
-from .serializers import (IngredientSerializer, RecipeSerializer,
-                          ShortRecipeSerializer, TagSerializer)
+from .serializers import (
+    IngredientSerializer,
+    RecipeSerializer,
+    ShortRecipeSerializer,
+    TagSerializer
+)
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -41,45 +51,66 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=['post', 'delete'],
-            permission_classes=[IsAuthenticated])
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated]
+    )
     def favorite(self, request, pk):
         if request.method == 'POST':
-            return self.add_obj(Favorite, request.user, pk)
+            return self.create_validated_obj(Favorite, request.user, pk)
         if request.method == 'DELETE':
-            return self.delete_obj(Favorite, request.user, pk)
-        return None
+            return self.delete_validated_object(Favorite, request.user, pk)
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @action(detail=True, methods=['post', 'delete'],
-            permission_classes=[IsAuthenticated])
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated]
+    )
     def shopping_cart(self, request, pk):
         if request.method == 'POST':
-            return self.add_obj(ShoppingCart, request.user, pk)
+            return self.create_validated_obj(ShoppingCart, request.user, pk)
         if request.method == 'DELETE':
-            return self.delete_obj(ShoppingCart, request.user, pk)
-        return None
+            return self.delete_validated_object(ShoppingCart, request.user, pk)
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def add_obj(self, model, user, pk):
+    def __add_object(self, model, user, pk):
         if model.objects.filter(user=user, recipe__id=pk).exists():
+            return False
+        recipe = get_object_or_404(Recipe, id=pk)
+        model.objects.create(user=user, recipe=recipe)
+        return True
+
+    def create_validated_obj(self, model, user, pk):
+        success = self.__add_object(model, user, pk)
+        if not success:
             return Response({
                 'errors': 'Такой рецепт уже существует'
             }, status=status.HTTP_400_BAD_REQUEST)
         recipe = get_object_or_404(Recipe, id=pk)
-        model.objects.create(user=user, recipe=recipe)
         serializer = ShortRecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete_obj(self, model, user, pk):
+    def __delete_object(self, model, user, pk):
         obj = model.objects.filter(user=user, recipe__id=pk)
         if not obj.exists():
+            return False
+        obj.delete()
+        return True
+
+    def delete_validated_object(self, model, user, pk):
+        success = self.__delete_object(model, user, pk)
+        if not success:
             return Response({
                 'errors': 'Данные уже были удалены'
             }, status=status.HTTP_400_BAD_REQUEST)
-        obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False,
-            permission_classes=[IsAuthenticated])
+    @action(
+        detail=False,
+        permission_classes=[IsAuthenticated]
+    )
     def download_shopping_cart(self, request):
         user = request.user
         if not user.shopping_cart.exists():
@@ -91,10 +122,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'ingredient__measurement_unit'
         ).annotate(amount=Sum('amount'))
 
-        responce = HttpResponse(content_type='text/plain')
+        response = HttpResponse(content_type='text/plain')
         filename = 'shopping_list.txt'
-        responce['Content-Disposition'] = f'attachment; filename={filename}'
-        writer = responce
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+        writer = response
         writer.write(['Ingredient', 'Amount', 'Measurement Unit', '\n'])
 
         for ingredient in ingredients:
@@ -103,4 +134,4 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 f'{ingredient["amount"]} '
                 f'{ingredient["ingredient__measurement_unit"]}.'
             ])
-        return responce
+        return response

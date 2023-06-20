@@ -2,12 +2,13 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = 'j&cw1y18j-)f@*6!92ux$y_&!knuzlri!t8x#bdgcxaax-y7w#'
+SECRET_KEY = 'foodgramm546939'
 
 DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'web']
 
+PAGE_SIZE = 6
 
 # Application definition
 
@@ -115,6 +116,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly'
     ],
+
 }
 
 DJOSER = {

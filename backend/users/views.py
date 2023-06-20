@@ -20,7 +20,8 @@ class CustomUserViewSet(UserViewSet):
     @action(
         permission_classes=[IsAuthenticated],
         detail=True,
-        methods=['post'])
+        methods=['post']
+    )
     def subscribe(self, request, id=None):
         user = request.user
         author = get_object_or_404(User, id=id)
@@ -73,15 +74,15 @@ class CustomUserViewSet(UserViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if Subscription.objects.filter(user=user, author=author).exists():
+        try:
             subscription = Subscription.objects.get(user=user, author=author)
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-
-        responce_data = {
-            'errors': 'Подписка не найдена'
-        }
-        return Response(
-            data=responce_data,
-            status=status.HTTP_404_NOT_FOUND,
-        )
+        except Subscription.DoesNotExist:
+            responce_data = {
+                'errors': 'Подписка не найдена'
+            }
+            return Response(
+                data=responce_data,
+                status=status.HTTP_404_NOT_FOUND,
+            )

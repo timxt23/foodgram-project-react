@@ -3,9 +3,9 @@ from django.db.models import F
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers, validators
+
 from users.models import Subscription
 from users.serializers import CustomUserSerializer
-
 from .models import Ingredient, IngredientRecipe, Recipe, Tag
 
 
@@ -52,18 +52,29 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
-                  'is_in_shopping_cart', 'name', 'image', 'text',
-                  'cooking_time')
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            'image',
+            'text',
+            'cooking_time'
+        )
 
     def get_ingredients(self, obj):
         recipe = obj
         return recipe.ingredient.annotate(
-            amount=F('ingredientrecipe__amount'),).values(
-                'id',
-                'name',
-                'measurement_unit',
-                'amount')
+            amount=F('ingredientrecipe__amount'),
+        ).values(
+            'id',
+            'name',
+            'measurement_unit',
+            'amount'
+        )
 
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
@@ -84,8 +95,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients = self.initial_data.get('ingredients')
         ingredient_list = []
         for ingredient_item in ingredients:
-            ingredient = get_object_or_404(Ingredient,
-                                           id=ingredient_item['id'])
+            ingredient = get_object_or_404(
+                Ingredient,
+                id=ingredient_item['id']
+            )
             if ingredient in ingredient_list:
                 raise serializers.ValidationError(
                     'Необходимы уникальные ингредиенты'
@@ -113,19 +126,16 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        instance.image = validated_data.get('image', instance.image)
-        instance.name = validated_data.get('name', instance.name)
-        instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get(
-            'cooking_time', instance.cooking_time
-        )
-        instance.tags.clear()
-        tags_data = self.initial_data.get('tags')
-        instance.tags.set(tags_data)
-        IngredientRecipe.objects.filter(recipe=instance).all().delete()
-        self.create_ingredients(validated_data.get('ingredients'), instance)
-        instance.save()
-        return instance
+        if 'ingredient' in validated_data:
+            ingredients_data = validated_data.pop('ingredients')
+            instance.ingredients_data.clear()
+            self.create_ingredients(ingredients_data, instance)
+        if 'tags' in validated_data:
+            instance.tags.clear()
+            tags_data = self.initial_data.get('tags')
+            instance.tags.set(tags_data)
+        return super().update(
+            instance, validated_data)
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
@@ -149,8 +159,16 @@ class FollowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subscription
-        fields = ('id', 'email', 'username', 'first_name', 'last_name',
-                  'is_following', 'recipes_count', 'recipes')
+        fields = (
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'is_following',
+            'recipes_count',
+            'recipes'
+        )
 
     def get_is_following(self, obj):
         return Subscription.objects.filter(
