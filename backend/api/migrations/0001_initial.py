@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=200, verbose_name='Название рецепта')),
                 ('text', models.TextField(verbose_name='Описнание')),
-                ('image', models.ImageField(upload_to='media/recipes', verbose_name='Фото')),
+                ('image', models.ImageField(upload_to='media/media', verbose_name='Фото')),
                 ('cooking_time', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(1, message='Значение должно быть больше 1')], verbose_name='Время приготовления')),
                 ('author', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='recipes', to=settings.AUTH_USER_MODEL, verbose_name='Автор')),
                 ('ingredient', models.ManyToManyField(related_name='recipes', through='api.IngredientRecipe', to='api.Ingredient', verbose_name='Ингредиенты')),
