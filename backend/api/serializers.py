@@ -134,8 +134,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             instance.tags.clear()
             tags_data = self.initial_data.get('tags')
             instance.tags.set(tags_data)
-        return super().update(
-            instance, validated_data)
+        return super().update(instance, validated_data)
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):

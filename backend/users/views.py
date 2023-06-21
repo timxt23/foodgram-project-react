@@ -1,5 +1,3 @@
-from api.pagination_limit import LimitPageNumberPagination
-from api.serializers import FollowSerializer
 from django.contrib.auth import get_user_model
 from djoser.views import UserViewSet
 from rest_framework import status
@@ -8,6 +6,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from api.pagination_limit import LimitPageNumberPagination
+from api.serializers import FollowSerializer
 from .models import Subscription
 
 User = get_user_model()
@@ -75,14 +75,24 @@ class CustomUserViewSet(UserViewSet):
             )
 
         try:
-            subscription = Subscription.objects.get(user=user, author=author)
-            subscription.delete()
+            removed_subs = Subscription.objects.filter(
+                user=user,
+                author=author
+            ).delete()
+            if removed_subs[0] == 0:
+                responce_data = {
+                    'errors': 'Подписка не найдена'
+                }
+                return Response(
+                    data=responce_data,
+                    status=status.HTTP_404_NOT_FOUND,
+                )
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except Subscription.DoesNotExist:
+        except Exception as e:
             responce_data = {
-                'errors': 'Подписка не найдена'
+                'errors': str(e)
             }
             return Response(
                 data=responce_data,
-                status=status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
