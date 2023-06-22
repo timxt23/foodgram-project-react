@@ -1,13 +1,14 @@
 [flake8]
 ignore =
     W503,
-    F811
+    F811,
+    I
 exclude =
     tests/,
     */migrations/,
     venv/,
     env/,
-    isort .
+    isort
 per-file-ignores =
     */settings.py:E501
 max-complexity = 10
