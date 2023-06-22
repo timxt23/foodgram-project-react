@@ -9,7 +9,7 @@ services:
 
   web:
     container_name: web
-    image: timxt/backend:latest
+    image: timxt/foodgram_backend:latest
     restart: always
     volumes:
       - ../backend:/app
@@ -21,7 +21,7 @@ services:
       - ./.env
 
   frontend:
-    image: timxt/frontend:latest
+    image: timxt/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
 
