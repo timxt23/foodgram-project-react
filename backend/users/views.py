@@ -75,11 +75,11 @@ class CustomUserViewSet(UserViewSet):
             )
 
         try:
-            removed_subs = Subscription.objects.filter(
+            removed_subs, _ = Subscription.objects.filter(
                 user=user,
                 author=author
             ).delete()
-            if removed_subs[0] == 0:
+            if removed_subs == 0:
                 responce_data = {
                     'errors': 'Подписка не найдена'
                 }
