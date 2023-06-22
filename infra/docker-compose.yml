@@ -12,7 +12,6 @@ services:
     image: timxt/foodgram_backend:latest
     restart: always
     volumes:
-      - ../backend:/app
       - static_value:/app/static/
       - media_value:/app/media/
     depends_on:
