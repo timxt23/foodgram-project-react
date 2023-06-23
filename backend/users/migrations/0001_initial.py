@@ -22,8 +22,8 @@ class Migration(migrations.Migration):
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='follower', to=settings.AUTH_USER_MODEL, verbose_name='Follower')),
             ],
             options={
-                'verbose_name': 'Subscription',
-                'verbose_name_plural': 'Subscriptions',
+                'verbose_name': 'Подписка',
+                'verbose_name_plural': 'Подписки',
                 'ordering': ['-id'],
             },
         ),

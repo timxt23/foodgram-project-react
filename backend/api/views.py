@@ -121,16 +121,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'ingredient__measurement_unit'
         ).annotate(amount=Sum('amount'))
 
-        response = HttpResponse(content_type='text/plain')
         filename = 'shopping_list.txt'
-        response['Content-Disposition'] = f'attachment; filename={filename}'
-        writer = response
-        writer.write(['Ingredient', 'Amount', 'Measurement Unit', '\n'])
+        shopping_list_body = 'Foodgram. Список покупок:\n\n'
 
         for ingredient in ingredients:
-            writer.write([
-                f'{ingredient["ingredient__name"]} -'
+            shopping_list_body += (
+                f'{ingredient["ingredient__name"]} - '
                 f'{ingredient["amount"]} '
-                f'{ingredient["ingredient__measurement_unit"]}.'
-            ])
+                f'{ingredient["ingredient__measurement_unit"]}\n'
+            )
+
+        response = HttpResponse(shopping_list_body, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
         return response

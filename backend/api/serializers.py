@@ -108,10 +108,15 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
+            amount = ingredient.get('amount')
+            if int(amount) < 1:
+                raise serializers.ValidationError(
+                    'Кол-во должно быть больше 1'
+                )
             IngredientRecipe.objects.create(
                 recipe=recipe,
                 ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'),
+                amount=amount,
             )
 
     @transaction.atomic
@@ -126,14 +131,12 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        if 'ingredient' in validated_data:
+        if 'ingredients' in validated_data:
             ingredients_data = validated_data.pop('ingredients')
-            instance.ingredients_data.clear()
+            instance.ingredient.clear()
             self.create_ingredients(ingredients_data, instance)
-        if 'tags' in validated_data:
-            instance.tags.clear()
-            tags_data = self.initial_data.get('tags')
-            instance.tags.set(tags_data)
+        tags_data = self.initial_data.get('tags')
+        instance.tags.set(tags_data)
         return super().update(instance, validated_data)
 
 

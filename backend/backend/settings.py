@@ -2,9 +2,9 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY: str(os.getenv('SECRET_KEY'))
+SECRET_KEY = 'foodgram546939'
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'web']
 
@@ -64,11 +64,11 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', default='foodgram'),
-        'USER': os.getenv('POSTGRES_USER', default='foodgram'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='546939'),
-        'HOST': os.getenv('DB_HOST', default='db'),
-        'PORT': os.getenv('DB_PORT', default='5432'),
+        'NAME': os.environ.get('DB_NAME', default='foodgram'),
+        'USER': os.environ.get('POSTGRES_USER', default='foodgram'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', default='546939'),
+        'HOST': os.environ.get('DB_HOST', default='db'),
+        'PORT': os.environ.get('DB_PORT', default='5432'),
     }
 }
 
@@ -89,7 +89,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
 
