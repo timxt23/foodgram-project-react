@@ -4,9 +4,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.getenv('SECRET_KEY', default='foodgram546939')
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'web', '158.160.48.203']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'web', '158.160.51.113']
 
 PAGE_SIZE = 6
 
