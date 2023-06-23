@@ -6,7 +6,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='foodgram546939')
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'web']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'web', '158.160.48.203']
 
 PAGE_SIZE = 6
 
